@@ -1,0 +1,125 @@
+// write sequence and test for read, write , reset, random, unknown,  and some pcie test.
+
+class base_seq extends uvm_component#(seq_item);
+  `uvm_component_utils(base_seq)
+  
+  function new(string n=" base_seq", uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  
+  function void build_phase(uvm_phase , phase);
+    super.build_phase(phase);
+    seq_item=seq::type_id::create("seq");
+  endfunction
+  task body();
+    // it's micro
+    `uvm_do(seq);
+    // other method
+    create_item(seq);
+    wait_for_grand();
+    seq.randomize();
+    send_randomize(seq);
+    wait_for_response();
+    response_done();
+  endtask 
+endclass
+
+class write_apb extends base_seq#(seq_item);
+  
+  // reg
+  // const
+  // create function (build_phase);
+  // logic for write
+  task body();
+     start_item(seq);
+    seq.randomize() with { pwrite=1; selet=1; enable=1;}
+         finish_item(seq);
+  endtask 
+  
+  //for read 
+  
+   task body();
+     start_item(seq);
+     seq.randomize() with { pwrite==0; selet==1; enable==1;}
+     finish_item(seq);
+  endtask 
+  
+  // Reset test
+  task body();
+     start_item(seq);
+    seq.randomize() with { Reset=1; pwrite==0; selet==0; enable==0; write_data=0; read_data=0;}
+     finish_item(seq);
+  endtask 
+  
+  //random test wit control of add and data
+   task body();
+     start_item(seq);
+     //  addr is 0:255, write_data 0:127, 
+     seq.randomize() with { addd <50; write_data <100;}
+     finish_item(seq);
+  endtask 
+  
+  // unknown test
+   task body();
+     start_item(seq);
+     seq.randomize();
+     finish_item(seq);
+  endtask 
+  
+  //write and read verify test in apb
+   task body();
+     start_item(seq);
+     seq.randomize() with {   }
+     finish_item(seq);
+  endtask 
+ // FIFO_reset_sequence.sv
+   task body();
+     start_item(seq);
+     seq.randomize() with { seq.reset=1;  seq.data_write=0; seq.wr_en=0; seq.rd_en=0;}
+     finish_item(seq);
+  endtask 
+  //FIFO_write_only_sequence.sv 
+   task body();
+     start_item(seq);
+     seq.randomize() with {seq.wr_en =1; seq.rd_en=0; seq.reset=0;  }
+     finish_item(seq);
+  endtask 
+//FIFO_read_only_sequence.sv  
+    task body();
+     start_item(seq);
+      seq.randomize() with {seq.wr_en =0; seq.rd_en=1; seq.reset=0;  }
+     finish_item(seq);
+  endtask 
+  
+  //FIFO_write_read_sequence.sv 
+   task body();
+     start_item(seq);
+      seq.randomize() with {}
+     finish_item(seq);
+  endtask 
+  //  FIFO_sync_toggle_sequence.sv  
+   task body();
+     start_item(seq);
+     seq.randomize() with { seq.wr_en=i%2; seq.rd_en=i%2;}
+     finish_item(seq);
+  endtask 
+  //  FIFO_Async_toggle_asequence.sv  
+   task body();
+     start_item(seq);
+     seq.randomize() with { seq.wr_en=i%2; seq.rd_en=!(i%2);}
+     finish_item(seq);
+  endtask 
+ // FIFO_random_sequence.sv  
+   task body();
+     start_item(seq);
+     assert(seq.randomize());
+     finish_item(seq);
+  endtask 
+  // Pcie test 
+  
+
+
+
+
+
+
