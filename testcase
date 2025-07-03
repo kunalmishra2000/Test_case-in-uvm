@@ -1,4 +1,19 @@
 // write sequence and test for read, write , reset, random, unknown,  and some pcie test.
+// TARGET 100 SEQUENCE FILE
+// SEQUENCE NAME
+//1. random sequence
+//2. unknown sequence
+//3. FIFO_reset_sequence.sv
+//4. write sequence
+//5. read sequence
+//6. reset sequence
+//7. write and read verify sequence 
+//8. FIFO_write_only_sequence.sv 
+//9.FIFO_read_only_sequence.sv  
+//10.FIFO_write_read_sequence.sv 
+//11.FIFO_sync_toggle_sequence.sv  
+//12.FIFO_async_toggle_asequence.sv 
+//13.FIFO_random_sequence.sv  
 
 class base_seq extends uvm_component#(seq_item);
   `uvm_component_utils(base_seq)
