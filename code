@@ -1,0 +1,303 @@
+// freq =250 //duty cycle=30%
+`timescale 1ns/1ps
+module tab;
+  parameter fre=50000000;
+  parameter duty=30;
+  //real xon,xoff;
+  real total_time=(1e9/fre);
+  reg clk;
+  real on=((duty/100.0)*total_time);
+  real of=(((100-duty)/100.0)*total_time);
+  
+  always begin
+    #6 clk=0;
+    #14 clk=1; 
+  end 
+  
+  initial begin 
+    clk=0;
+    #200 $finish();
+  end 
+  
+  initial begin 
+    
+    //total_time=(1e9/fre);
+    $display("totaltime %f ns ",total_time);
+    
+    #10;//on time 
+   // xon=duty/100;
+    //on=xon*total_time;
+    $monitor("on_time %0f ns ",on);
+    
+   #10;
+    //xoff = (100-duty)/100;
+   // of=xoff*total_time;
+    $monitor("of_time %0f ns ",of);
+  end
+  
+  initial begin
+  
+   $dumpfile("dump.vcd");
+  $dumpvars;
+end
+endmodule
+  
+
+module pra; 
+  task ab(input int a);
+
+
+    repeat(3)begin
+          $display(" check time ",$time);
+   $display("value=%0d t=",a,$time);
+ #5 a = a+5;
+   $display("value=%0d t=",a,$time);
+ #5;
+ a= a+5;
+   $display("value=%0d t=",a,$time);
+    end
+ endtask
+ initial begin
+ ab(5);
+//    #5;
+//    ab(100);
+ end
+ endmodule
+
+
+//`timescale 1ns/1ps
+
+
+module clock_gen (
+  output reg clk);
+    parameter FREQ=250; // hz
+ // parameter FREQ = 100000;  // in kHZ
+  
+  
+  parameter DUTY = 30;  // in percentage
+ // real clk_pd  =1/FREQ*1e9;
+  real clk_pd  = 1.0/(FREQ * 1e5) * 1e9; // convert to ns
+real clk_on  = DUTY/100.0 * clk_pd;
+  // real clk_on =DUTY/100.0*clk_pd;
+  real clk_off = (100.0 - DUTY)/100.0 * clk_pd;
+  
+
+
+  initial begin
+    $display("FREQ      = %0d ", FREQ);
+  
+    $display("DUTY      = %0d %%",  DUTY);
+
+
+    $display("PERIOD    = %0.3f ns", clk_pd);
+    $display("CLK_ON    = %0.3f ns", clk_on);
+    $display("CLK_OFF   = %0.3f ns", clk_off);
+  
+  end
+
+
+
+
+
+
+  initial begin
+    clk=1;
+    #40000 $finish();
+  end
+  
+  always begin
+
+
+    #(clk_on) clk = 0;
+    #(clk_off) clk = 1;
+        end
+
+
+initial begin
+  
+   $dumpfile("dump.vcd");
+  $dumpvars;
+end
+  
+endmodule
+// we need dynamic type class because of protocol.
+//we initial multiple transaction
+
+
+class packet;
+ int a;
+// agar, ham memory type ka koi chiz method main nahi liye hain ya method koi memory ka need nahi hain fir module maine //bina memory create kiye ham  display karba skte (koi error nahi aayega).  
+  // is method ke pass koi memory
+  function display();
+    $display("display without allocate memory ");
+  endfunction
+  // Method have memory base transaction need to allocated memory
+  function display();
+    $display("display without allocate memory=%0d",a); // need memory for operation
+  endfunction
+endclass
+module tab;
+  // agar method ko koi memory ka need nahi hain to hamko new(memory allocated) karne ka zarurt nahi hain
+  packet pac; // through, handle we call class; 
+  initial begin
+    pac.display();
+  end
+endmodule
+ 
+ 
+lass packet;
+  rand bit [31:0] a; //output
+  rand bit [31:0] b;
+   rand bit c;
+  rand bit [7:0] y;
+  int sum;
+  function int num(int c);
+    for(int i=0; i<b; i++)
+      if(2**i >b)
+      return i-1;
+  endfunction
+  
+function void post_randomize();
+    if(!c)
+      a=b;
+  else 
+    y=num(b);
+    a=2**y;
+  
+//     if(c)
+//       d=2**b;
+//     //$display("power a=%0d",a);
+//     else 
+//       e=2**b;
+//     $display("power d=%0d",d);
+    $display("  enable=%0d",c);
+    $display(" b=%0d",b);
+    $display(" y=%0d",y);
+    $display(" power e=%0d",a);
+  endfunction
+endclass
+module tab;
+  packet pac=new();
+  initial begin
+    repeat(100)
+      //pac.dis();
+    pac.randomize();
+  end
+endmodule 
+    
+ 
+
+
+`uvm_analysis_imp_decl(a)
+`uvm_analysis_imp_decl(b)
+`uvm_analysis_imp_decl(c)
+`uvm_analysis_imp_decl(d)
+`uvm_analysis_imp_decl(out_data)
+class score extends uvm_scoreborad;
+  
+  
+uvm_analysis_imp_a #(transaction,score) analysis_imp_a;  
+uvm_analysis_imp_b #(transaction,score) analysis_imp_b; 
+uvm_analysis_imp_c #(transaction,score) analysis_imp_c;  
+uvm_analysis_imp_d #(transaction,score) analysis_imp_d;
+uvm_analysis_out_data #(transaction,score) analysis_out_data;
+  function new(string n="score", uvm_component p);
+    analysis_imp_a a1=new(); 
+    analysis_imp_b b1=new();
+    analysis_imp_c c1=new();
+    analysis_imp_d d1=new();
+    super.new(n,p);
+  endfunction 
+  
+  function void write_a(seq s);
+    int que[$];
+    que.push_front(s);
+  endfunction
+  
+  function void write_b(seq s);
+    int que[$];
+    que.push_front(s);
+  endfunction
+  
+  
+   function void write_b(seq s);
+    int que[$];
+    que.push_front(s);
+  endfunction
+  
+  
+   function void write_c(seq s);
+    int que[$];
+    que.push_front(s);
+  endfunction
+  
+  // it's for output_monitor
+  function void write_out(seq s);
+    int que_out[$];
+    que_out.push_front(s);
+  endfunction
+  
+  task body();
+    seq seq_out;
+    seq seq_in;
+    que_out.pop_back(seq_out);
+    que.pop_back(seq_in);
+    if(seq_out !=seq_in)
+      `uvm_error(get_type_name,$sformatf("MISMATCH::DATA [seq_out=%0d NOT matched seq_in=%0d]",seq_out,seq_in))
+      else 
+      `uvm_info(get_type_name,$sformatf("MATCH::DATA [seq_out=%0d NOT matched seq_in=%0d]",seq_out,seq_in))
+     endtask 
+endclass  
+  
+  
+  //envir 
+class env extends uvm_env;
+  `uvm_component_utils(env)
+// we have four axi master and 4 axi slave
+  axi_m1 m1;
+  axi_m2 m2;
+  axi_m3 m3;
+  axi_m4 m4;
+  // 4 slave
+   axi_s1 s1;
+  axi_s2 s2;
+  axi_s3 s3;
+  axi_s4 s4;
+  
+  function new (string n="env",uvm_component p);
+    super.new(n,p);
+  endfunction
+  
+  function void build_phase();
+    m1=axi_m1::type_id::create("m1");
+    
+  endfunction
+  
+  
+  function void connect();
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+          
+  
+  
+  
+  
+
+
+
+
+ 
+ 
+ 
